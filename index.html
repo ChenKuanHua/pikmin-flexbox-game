@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 皮克敏花苗孵化場 — Flexbox 闖關</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+
+:root{
+  --sky1:#5AB8EC;--sky2:#3A9DD6;
+  --grass1:#72BE48;--grass2:#4A9A28;
+  --card:#FFF;--card-shadow:0 6px 28px rgba(0,0,0,.10);
+  --teal:#18B09E;--teal-lt:#D4F4EF;
+  --stage:#F2FBF4;--stage-bd:#B4E0C4;
+  --text:#1A3828;--sub:#6B8F7A;
+  --editor:#0E1822;
+  --hint-bg:#FFFAE0;--hint-bd:#FFD740;
+  --orange:#F06820;
+}
+
+body{
+  font-family:'Segoe UI','Microsoft JhengHei',sans-serif;
+  background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 40%,var(--grass1) 58%,var(--grass2) 100%);
+  display:flex;flex-direction:column;padding:8px 14px 0;gap:6px;
+}
+
+/* ── Header ── */
+#hd{flex-shrink:0;text-align:center;padding:6px 0 2px;color:#fff}
+#hd h1{font-size:1.55rem;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.18);letter-spacing:.02em;margin-bottom:2px}
+#hd p{font-size:.78rem;opacity:.9;margin-bottom:8px}
+#dots{display:flex;justify-content:center;gap:9px}
+.dot{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:rgba(255,255,255,.55);transition:all .35s}
+.dot.active{background:rgba(255,255,255,.35);border-color:#fff;color:#fff;box-shadow:0 0 12px rgba(255,255,255,.65)}
+.dot.done{background:#FFD54F;border-color:#FFB300;color:#7A4500;box-shadow:0 0 8px rgba(255,185,0,.5)}
+
+/* ── Cards wrapper ── */
+#cw{flex:1;min-height:0;position:relative}
+
+/* ── Card ── */
+.card{display:none;position:absolute;inset:0;background:var(--card);border-radius:24px;padding:16px 20px 14px;box-shadow:var(--card-shadow)}
+.card:not(.hidden){display:flex;flex-direction:column}
+.hidden{display:none!important}
+
+.lv-head{flex-shrink:0;margin-bottom:10px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 14px;border-radius:99px;font-size:.72rem;font-weight:800;margin-bottom:5px;color:#fff;letter-spacing:.05em}
+.badge-red{background:linear-gradient(135deg,#FF5252,#C62828)}
+.badge-yellow{background:linear-gradient(135deg,#FFB300,#E65100)}
+.badge-blue{background:linear-gradient(135deg,#29B6F6,#0277BD)}
+.badge-purple{background:linear-gradient(135deg,#CE93D8,#7B1FA2)}
+.badge-pink{background:linear-gradient(135deg,#F48FB1,#AD1457)}
+.lv-title{font-size:1.15rem;font-weight:800;color:var(--text)}
+
+/* ── Grid ── */
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:2fr 3fr;gap:16px}
+.left{display:flex;flex-direction:column;gap:7px;overflow-y:auto;min-height:0}
+.right{display:flex;flex-direction:column;gap:6px;min-height:0}
+
+/* ── Left elements ── */
+.story{font-size:.82rem;color:var(--sub);line-height:1.65;background:var(--teal-lt);border-left:4px solid var(--teal);padding:8px 11px;border-radius:10px;flex-shrink:0}
+.sec{font-size:.66rem;font-weight:800;color:#9BB0A0;letter-spacing:.08em;text-transform:uppercase;flex-shrink:0}
+.tbox{background:#F4FBF6;border:1.5px solid #C4E4CC;border-radius:10px;padding:8px;flex-shrink:0}
+.tflex{background:#E4F5EA;border:1.5px solid #B2D9BA;border-radius:7px;padding:6px;min-height:46px}
+.titem{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#69C979,#3EA84E);margin:3px;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;font-weight:800;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.editor{background:var(--editor);border-radius:12px;padding:10px 12px;border:1px solid rgba(80,120,180,.18);flex-shrink:0}
+.cpre{color:#7FCBFF;font-family:'Courier New',monospace;font-size:.8rem;line-height:1.4}
+.editor textarea{width:100%;background:transparent;border:none;outline:none;color:#C3E88D;font-family:'Courier New',monospace;font-size:.8rem;resize:none;height:48px;padding:2px 0 2px 18px;line-height:1.65}
+.editor textarea::placeholder{color:#3E4D6A}
+.editor textarea:disabled{opacity:.4;cursor:not-allowed}
+.note{font-size:.68rem;color:#9BB0A5;flex-shrink:0}
+.note code{background:rgba(160,220,160,.12);border:1px solid rgba(100,180,100,.2);padding:1px 5px;border-radius:4px;color:#52907A;font-size:.74rem}
+.btn-hint{background:#FFF0E4;color:var(--orange);border:2px solid #FFBA80;padding:6px 16px;border-radius:99px;font-size:.8rem;font-weight:800;cursor:pointer;align-self:flex-start;transition:all .18s;flex-shrink:0}
+.btn-hint:hover{background:#FFE4CC;transform:translateY(-1px)}
+.hint-box{background:var(--hint-bg);border:1.5px solid var(--hint-bd);border-radius:10px;padding:8px 11px;font-size:.8rem;color:#7A5500;line-height:1.6;flex-shrink:0}
+.hint-box code{background:#FFFAE0;border:1px solid #FFE082;padding:1px 5px;border-radius:4px;color:#B8760A}
+
+/* ── Stage ── */
+.stage{flex:1;min-height:0;background:var(--stage);border:2px solid var(--stage-bd);border-radius:14px;overflow:hidden;position:relative}
+
+/* Field — student-controlled container */
+.field{padding:12px;height:100%}
+
+/* Seed images: display:block → stack vertically without flex parent (Level 1 "wrong" state) */
+.seed-img{display:block;width:80px;height:80px;object-fit:contain;margin:4px;flex-shrink:0;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
+
+@keyframes seedShake{0%,100%{transform:scale(1) rotate(0)}20%{transform:scale(1.25) rotate(-12deg)}40%{transform:scale(1.32) rotate(12deg)}60%{transform:scale(1.18) rotate(-7deg)}80%{transform:scale(1.1) rotate(4deg)}}
+.seed-img.shaking{animation:seedShake .38s ease forwards;filter:drop-shadow(0 0 16px rgba(255,220,60,.95))}
+@keyframes seedGone{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateY(-8px);opacity:.7}100%{transform:scale(0) translateY(20px);opacity:0}}
+.seed-img.gone{animation:seedGone .36s ease forwards;pointer-events:none}
+
+.conf-zone{position:absolute;inset:0;pointer-events:none;z-index:10;overflow:hidden}
+.cp{position:absolute;top:-10px;border-radius:2px;animation:cfFall 1.5s ease-in forwards}
+@keyframes cfFall{0%{transform:translateY(0) rotate(0);opacity:1}75%{opacity:1}100%{transform:translateY(340px) rotate(720deg);opacity:0}}
+
+/* ── Flying Pikmin (JS-controlled) ── */
+.flying-pik{position:fixed;width:56px;height:56px;z-index:500;pointer-events:none}
+.flying-pik img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 3px 10px rgba(0,0,0,.35))}
+
+/* ── Party Bar ── */
+#pb{flex-shrink:0;height:72px;background:linear-gradient(0deg,rgba(16,72,16,.97),rgba(36,102,36,.92));border-top:3px solid rgba(255,255,255,.18);border-radius:16px 16px 0 0;display:flex;align-items:center;gap:10px;padding:0 14px}
+#pb-label{display:flex;flex-direction:column;align-items:center;flex-shrink:0;min-width:40px}
+#pb-count{font-size:1.4rem;font-weight:900;color:#FFD54F;text-shadow:0 2px 6px rgba(0,0,0,.32);line-height:1.1}
+#pb-tag{font-size:.58rem;font-weight:800;letter-spacing:.07em;color:rgba(255,255,255,.72);text-transform:uppercase}
+#pb-div{width:2px;height:48px;background:rgba(255,255,255,.16);border-radius:2px;flex-shrink:0}
+#pb-inner{display:flex;flex-wrap:wrap;gap:2px;align-items:flex-end;flex:1;overflow:hidden;min-height:0}
+
+.pp{opacity:0;transform:translateY(-20px) scale(.3);display:inline-flex}
+.pp img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 7px rgba(0,0,0,.28))}
+.pp.arrived{animation:ppLand .55s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes ppLand{0%{transform:translateY(-20px) scale(.3);opacity:0}62%{transform:translateY(6px) scale(1.25);opacity:1}80%{transform:translateY(-2px) scale(.92)}100%{transform:translateY(0) scale(1);opacity:1}}
+.pp.celebrate{animation:ppSway 2s ease-in-out infinite}
+@keyframes ppSway{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(8deg) translateY(-7px)}}
+
+/* ── Complete ── */
+#comp{position:fixed;inset:0;z-index:200;background:linear-gradient(165deg,#4AAEE0 0%,#72C44A 55%,#3D9A2A 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:24px;overflow:auto}
+#comp h2{font-size:2.2rem;font-weight:900;text-shadow:0 3px 0 rgba(0,0,0,.18);margin-bottom:6px}
+#comp>p{font-size:.9rem;opacity:.92;max-width:360px;line-height:1.75}
+#fp{display:flex;gap:5px;margin:14px 0;flex-wrap:wrap;justify-content:center;max-width:500px}
+.fpi{animation:ppSway 2s ease-in-out infinite}
+.fpi img{width:66px;height:66px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.25))}
+.fpi:nth-child(1){animation-delay:.00s}.fpi:nth-child(2){animation-delay:.11s}.fpi:nth-child(3){animation-delay:.22s}
+.fpi:nth-child(4){animation-delay:.33s}.fpi:nth-child(5){animation-delay:.44s}.fpi:nth-child(6){animation-delay:.55s}
+.fpi:nth-child(7){animation-delay:.06s}.fpi:nth-child(8){animation-delay:.17s}.fpi:nth-child(9){animation-delay:.28s}
+.fpi:nth-child(10){animation-delay:.39s}.fpi:nth-child(11){animation-delay:.50s}.fpi:nth-child(12){animation-delay:.03s}
+.fpi:nth-child(13){animation-delay:.14s}.fpi:nth-child(14){animation-delay:.25s}.fpi:nth-child(15){animation-delay:.36s}
+.fpi:nth-child(16){animation-delay:.47s}.fpi:nth-child(17){animation-delay:.58s}.fpi:nth-child(18){animation-delay:.09s}
+.fpi:nth-child(19){animation-delay:.20s}.fpi:nth-child(20){animation-delay:.31s}
+.summary{font-size:.74rem;opacity:.62;margin-top:8px;font-family:'Courier New',monospace;line-height:1.8}
+.btn-replay{margin-top:16px;background:rgba(255,255,255,.22);color:#fff;border:2.5px solid rgba(255,255,255,.6);padding:10px 26px;border-radius:99px;font-size:.9rem;font-weight:800;cursor:pointer;transition:.2s}
+.btn-replay:hover{background:rgba(255,255,255,.35)}
+</style>
+</head>
+<body>
+
+<div id="hd">
+  <h1>🌱 皮克敏花苗孵化場 🌱</h1>
+  <p>用 Flexbox 的力量幫花苗排好位置，孵化出帶飾品的可愛皮克敏！</p>
+  <div id="dots">
+    <div class="dot active" id="d1">1</div>
+    <div class="dot" id="d2">2</div>
+    <div class="dot" id="d3">3</div>
+    <div class="dot" id="d4">4</div>
+    <div class="dot" id="d5">5</div>
+  </div>
+</div>
+
+<div id="cw">
+
+<!-- 第 1 關 -->
+<div class="card" id="lv1">
+  <div class="lv-head">
+    <div class="badge badge-red">🔴 第 1 關 / 共 5 關</div>
+    <div class="lv-title">讓花苗排成一橫排！</div>
+  </div>
+  <div class="grid">
+    <div class="left">
+      <p class="story">小紅皮克敏的三株花苗全縱向疊在角落，曬不到太陽！幫它們排成一橫排，讓每株都沐浴在陽光下。</p>
+      <div class="sec">🎯 目標排列</div>
+      <div class="tbox"><div class="tflex" style="display:flex"><div class="titem">A</div><div class="titem">B</div><div class="titem">C</div></div></div>
+      <div class="sec">✏️ 輸入 CSS（即時套用）</div>
+      <div class="editor">
+        <div class="cpre">.container {</div>
+        <textarea id="i1" placeholder="  /* 讓容器成為 Flex 外容器的屬性是什麼？ */"></textarea>
+        <div class="cpre">}</div>
+      </div>
+      <button class="btn-hint" onclick="hint(1)">💡 提示</button>
+      <div class="hint-box hidden" id="h1">💡 試試 <code>display</code> 屬性！<br>寫法：<code>display: flex;</code></div>
+    </div>
+    <div class="right">
+      <div class="sec">🌱 花苗田（縱向堆疊）</div>
+      <div class="stage"><div class="field" id="c1">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/2/27/Red_Seedling_icon.png" alt="紅花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/2/27/Red_Seedling_icon.png" alt="紅花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/2/27/Red_Seedling_icon.png" alt="紅花苗">
+      </div><div class="conf-zone" id="cf1"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第 2 關 -->
+<div class="card hidden" id="lv2">
+  <div class="lv-head">
+    <div class="badge badge-yellow">🟡 第 2 關 / 共 5 關</div>
+    <div class="lv-title">讓花苗水平置中！</div>
+  </div>
+  <div class="grid">
+    <div class="left">
+      <p class="story">黃皮克敏的花苗已經橫排了，但全擠在最左邊。公園走道在正中間，幫它們移到中央吧！</p>
+      <div class="sec">🎯 目標排列</div>
+      <div class="tbox"><div class="tflex" style="display:flex;justify-content:center"><div class="titem">A</div><div class="titem">B</div><div class="titem">C</div></div></div>
+      <div class="sec">✏️ 輸入 CSS</div>
+      <div class="editor">
+        <div class="cpre">.container {</div>
+        <textarea id="i2" placeholder="  /* 容器已有 display:flex
+  控制主軸對齊的屬性是什麼？ */"></textarea>
+        <div class="cpre">}</div>
+      </div>
+      <div class="note">（容器已有 <code>display: flex</code>，只需加新屬性）</div>
+      <button class="btn-hint" onclick="hint(2)">💡 提示</button>
+      <div class="hint-box hidden" id="h2">💡 控制主軸對齊的屬性叫 <code>justify-content</code>。<br>試試設定成 <code>center</code>！</div>
+    </div>
+    <div class="right">
+      <div class="sec">🌱 花苗田（靠左排列）</div>
+      <div class="stage"><div class="field" id="c2">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/2/28/Yellow_Seedling_icon.png" alt="黃花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/2/28/Yellow_Seedling_icon.png" alt="黃花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/2/28/Yellow_Seedling_icon.png" alt="黃花苗">
+      </div><div class="conf-zone" id="cf2"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第 3 關 -->
+<div class="card hidden" id="lv3">
+  <div class="lv-head">
+    <div class="badge badge-blue">🔵 第 3 關 / 共 5 關</div>
+    <div class="lv-title">讓花苗垂直置中！</div>
+  </div>
+  <div class="grid">
+    <div class="left">
+      <p class="story">藍皮克敏的花苗需要對齊河道中線才能喝到水。花苗田有固定高度，讓花苗靠到垂直方向的正中間！</p>
+      <div class="sec">🎯 目標排列</div>
+      <div class="tbox"><div class="tflex" style="display:flex;align-items:center;height:100px"><div class="titem">A</div><div class="titem">B</div><div class="titem">C</div></div></div>
+      <div class="sec">✏️ 輸入 CSS</div>
+      <div class="editor">
+        <div class="cpre">.container {</div>
+        <textarea id="i3" placeholder="  /* 容器已有 display:flex，高度撐滿花苗田
+  花苗目前靠上方，控制垂直對齊的屬性？ */"></textarea>
+        <div class="cpre">}</div>
+      </div>
+      <div class="note">（容器已有 <code>display: flex</code>，高度撐滿花苗田）</div>
+      <button class="btn-hint" onclick="hint(3)">💡 提示</button>
+      <div class="hint-box hidden" id="h3">💡 控制交錯軸（垂直）的屬性叫 <code>align-items</code>。<br>試試設定成 <code>center</code>！</div>
+    </div>
+    <div class="right">
+      <div class="sec">🌱 花苗田（花苗目前靠上方）</div>
+      <div class="stage"><div class="field" id="c3">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/7/7b/Blue_Seedling_icon.png" alt="藍花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/7/7b/Blue_Seedling_icon.png" alt="藍花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/7/7b/Blue_Seedling_icon.png" alt="藍花苗">
+      </div><div class="conf-zone" id="cf3"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第 4 關 -->
+<div class="card hidden" id="lv4">
+  <div class="lv-head">
+    <div class="badge badge-purple">🟣 第 4 關 / 共 5 關</div>
+    <div class="lv-title">讓主軸方向改成直向！</div>
+  </div>
+  <div class="grid">
+    <div class="left">
+      <p class="story">紫皮克敏的花苗要沿著懸崖邊緣往下排，不能橫排。讓 Flex 的主軸從橫向改為「從上到下」！</p>
+      <div class="sec">🎯 目標排列</div>
+      <div class="tbox"><div class="tflex" style="display:flex;flex-direction:column;height:160px"><div class="titem">A</div><div class="titem">B</div><div class="titem">C</div></div></div>
+      <div class="sec">✏️ 輸入 CSS</div>
+      <div class="editor">
+        <div class="cpre">.container {</div>
+        <textarea id="i4" placeholder="  /* 容器已有 display:flex（預設橫排）
+  試試改變 Flex 的軸線方向 */"></textarea>
+        <div class="cpre">}</div>
+      </div>
+      <div class="note">（容器已有 <code>display: flex</code>）</div>
+      <button class="btn-hint" onclick="hint(4)">💡 提示</button>
+      <div class="hint-box hidden" id="h4">💡 控制 Flex 方向的屬性叫 <code>flex-direction</code>。<br>預設是 <code>row</code>，試試改成 <code>column</code>！</div>
+    </div>
+    <div class="right">
+      <div class="sec">🌱 花苗田（橫向排列）</div>
+      <div class="stage"><div class="field" id="c4">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/6/62/Purple_Seedling_icon.png" alt="紫花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/6/62/Purple_Seedling_icon.png" alt="紫花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/6/62/Purple_Seedling_icon.png" alt="紫花苗">
+      </div><div class="conf-zone" id="cf4"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第 5 關 -->
+<div class="card hidden" id="lv5">
+  <div class="lv-head">
+    <div class="badge badge-pink">🌸 第 5 關 / 共 5 關</div>
+    <div class="lv-title">讓花苗太多時自動換行！</div>
+  </div>
+  <div class="grid">
+    <div class="left">
+      <p class="story">翅膀皮克敏的 8 株花苗擠在一排，右邊的全部跑出花苗田了！幫它們設定「放不下就換行」，讓花苗自動分成多排！</p>
+      <div class="sec">🎯 目標排列</div>
+      <div class="tbox"><div class="tflex" style="display:flex;flex-wrap:wrap;width:190px"><div class="titem">A</div><div class="titem">B</div><div class="titem">C</div><div class="titem">D</div><div class="titem">E</div><div class="titem">F</div></div></div>
+      <div class="sec">✏️ 輸入 CSS</div>
+      <div class="editor">
+        <div class="cpre">.container {</div>
+        <textarea id="i5" placeholder="  /* 容器已有 display:flex
+  Flex 預設不換行，試試加上換行設定 */"></textarea>
+        <div class="cpre">}</div>
+      </div>
+      <div class="note">（容器已有 <code>display: flex</code>）</div>
+      <button class="btn-hint" onclick="hint(5)">💡 提示</button>
+      <div class="hint-box hidden" id="h5">💡 控制換行的屬性叫 <code>flex-wrap</code>！<br>試試設定成 <code>wrap</code>。</div>
+    </div>
+    <div class="right">
+      <div class="sec">🌱 花苗田（8 株，右邊都跑出去了！）</div>
+      <div class="stage"><div class="field" id="c5">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+        <img class="seed-img" src="https://pikmin.wiki.gallery/images/c/cd/Pink_Seedling_icon.png" alt="粉花苗">
+      </div><div class="conf-zone" id="cf5"></div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #cw -->
+
+<!-- Party Bar -->
+<div id="pb">
+  <div id="pb-label">
+    <div id="pb-count">0</div>
+    <div id="pb-tag">隻皮克敏</div>
+  </div>
+  <div id="pb-div"></div>
+  <div id="pb-inner"></div>
+</div>
+
+<!-- Complete -->
+<div id="comp" class="hidden">
+  <h2>🎊 恭喜全部通關！</h2>
+  <div id="fp"></div>
+  <p>你成功孵化了所有皮克敏！<br>Flexbox 的基本功力你已經掌握了！</p>
+  <div class="summary">display:flex ／ justify-content ／ align-items ／ flex-direction ／ flex-wrap ✨</div>
+  <button class="btn-replay" onclick="location.reload()">🔄 再玩一次</button>
+</div>
+
+<script>
+const PIKS={
+  1:'https://static.wikia.nocookie.net/pikmin/images/5/56/P4_Red_Pikmin.png/revision/latest?cb=20230818155739',
+  2:'https://static.wikia.nocookie.net/pikmin/images/8/8d/P4_Yellow_Pikmin.png/revision/latest?cb=20230818163721',
+  3:'https://static.wikia.nocookie.net/pikmin/images/5/54/P4_Blue_Pikmin.png/revision/latest?cb=20230818163738',
+  4:'https://static.wikia.nocookie.net/pikmin/images/e/e4/P4_Purple_Pikmin.png/revision/latest?cb=20230818164146',
+  5:'https://static.wikia.nocookie.net/pikmin/images/9/9e/P4_Winged_Pikmin.png/revision/latest?cb=20230818164217',
+};
+
+const BASE={
+  1:{},
+  2:{display:'flex'},
+  3:{display:'flex'},
+  4:{display:'flex'},
+  5:{display:'flex'},
+};
+
+const PASS={
+  1:s=>s.display==='flex',
+  2:s=>s.display==='flex'&&s.justifyContent==='center',
+  3:s=>s.display==='flex'&&s.alignItems==='center',
+  4:s=>s.display==='flex'&&s.flexDirection==='column',
+  5:s=>s.display==='flex'&&s.flexWrap==='wrap',
+};
+
+const done=new Set();
+let partyCount=0;
+let flySlot=0;
+let cur=1;
+const FLY_MS=800;
+
+[1,2,3,4,5].forEach(n=>applyCSS(n,''));
+
+function applyCSS(n,txt){
+  const el=document.getElementById('c'+n);
+  el.removeAttribute('style');
+  Object.entries(BASE[n]).forEach(([p,v])=>el.style[p]=v);
+  (txt.match(/[\w-]+\s*:\s*[^;}\n]+/g)||[]).forEach(rule=>{
+    const i=rule.indexOf(':');
+    const p=rule.slice(0,i).trim();
+    const v=rule.slice(i+1).trim();
+    el.style[p.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]=v;
+  });
+}
+
+[1,2,3,4,5].forEach(n=>{
+  document.getElementById('i'+n).addEventListener('input',function(){
+    if(done.has(n))return;
+    applyCSS(n,this.value);
+    const s=getComputedStyle(document.getElementById('c'+n));
+    if(PASS[n]({display:s.display,flexDirection:s.flexDirection,justifyContent:s.justifyContent,alignItems:s.alignItems,flexWrap:s.flexWrap}))celebrate(n);
+  });
+});
+
+function celebrate(n){
+  if(done.has(n))return;
+  done.add(n);
+  document.getElementById('i'+n).disabled=true;
+  document.getElementById('d'+n).classList.replace('active','done');
+
+  const seeds=[...document.querySelectorAll('#c'+n+' .seed-img')];
+  const stagger=seeds.length<=4?500:300; /* faster stagger for more seeds */
+  spawnConfetti(document.getElementById('cf'+n));
+
+  seeds.forEach((seed,idx)=>{
+    setTimeout(()=>{
+      seed.classList.add('shaking');
+      setTimeout(()=>{
+        seed.classList.remove('shaking');
+        const rect=seed.getBoundingClientRect();
+        seed.classList.add('gone');
+        flyPik(n, rect);
+      },360);
+    },idx*stagger);
+  });
+
+  /* Auto-advance after all Pikmin have landed */
+  setTimeout(()=>nextLv(n), seeds.length*stagger+360+FLY_MS+500);
+}
+
+function flyPik(n, seedRect){
+  const slot=flySlot++;
+  const inner=document.getElementById('pb-inner');
+  const barRect=inner.getBoundingClientRect();
+
+  const sx=seedRect.left+seedRect.width/2-28;
+  const sy=seedRect.top+seedRect.height/2-28;
+  const tx=Math.min(barRect.left+slot*54, barRect.right-56);
+  const ty=barRect.top+barRect.height/2-28;
+
+  const fly=document.createElement('div');
+  fly.className='flying-pik';
+  fly.style.left=sx+'px';
+  fly.style.top=sy+'px';
+  const img=document.createElement('img');
+  img.src=PIKS[n];img.alt='皮克敏';
+  fly.appendChild(img);
+  document.body.appendChild(fly);
+
+  const dx=tx-sx, dy=ty-sy;
+  const arcH=Math.max(80,Math.abs(dy)*0.55+60);
+  const t0=performance.now();
+
+  (function frame(now){
+    const t=Math.min((now-t0)/FLY_MS,1);
+    const e=t<.5?2*t*t:-1+(4-2*t)*t; /* easeInOut */
+    fly.style.left=(sx+dx*e)+'px';
+    fly.style.top=(sy+dy*e-Math.sin(t*Math.PI)*arcH)+'px';
+    fly.style.transform=`scale(${0.7+0.3*Math.sin(t*Math.PI)}) rotate(${t*-180}deg)`;
+    fly.style.opacity=t<.08?t*12:1;
+    if(t<1)requestAnimationFrame(frame);
+    else{fly.remove();addToParty(n);}
+  })(t0);
+}
+
+function addToParty(n){
+  document.getElementById('pb-count').textContent=++partyCount;
+  const div=document.createElement('div');
+  div.className='pp';
+  const img=document.createElement('img');
+  img.src=PIKS[n];img.alt='皮克敏';
+  div.appendChild(img);
+  document.getElementById('pb-inner').appendChild(div);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>div.classList.add('arrived')));
+}
+
+function nextLv(n){
+  document.getElementById('lv'+n).classList.add('hidden');
+  cur++;
+  if(cur>5){showComplete();return;}
+  document.getElementById('lv'+cur).classList.remove('hidden');
+  document.getElementById('d'+cur).classList.add('active');
+  flySlot=partyCount; /* reset slot offset to avoid overlap with existing Pikmin */
+}
+
+function showComplete(){
+  const fp=document.getElementById('fp');
+  fp.innerHTML='';
+  /* seeds per level: 1→3, 2→3, 3→3, 4→3, 5→8 */
+  const COUNT={1:3,2:3,3:3,4:3,5:8};
+  [1,2,3,4,5].forEach(lv=>{
+    for(let i=0;i<COUNT[lv];i++){
+      const d=document.createElement('div');
+      d.className='fpi';
+      const img=document.createElement('img');
+      img.src=PIKS[lv];img.alt='皮克敏';
+      d.appendChild(img);fp.appendChild(d);
+    }
+  });
+  document.querySelectorAll('.pp').forEach(p=>p.classList.add('celebrate'));
+  document.getElementById('comp').classList.remove('hidden');
+}
+
+function hint(n){document.getElementById('h'+n).classList.toggle('hidden');}
+
+function spawnConfetti(zone){
+  const C=['#FF6B6B','#FFD93D','#6BCB77','#4D96FF','#FF6BFF','#FF9A3C','#00D9C0','#C77DFF'];
+  for(let i=0;i<36;i++){
+    const p=document.createElement('div');
+    p.className='cp';
+    const s=6+Math.random()*6;
+    p.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s}px;background:${C[Math.floor(Math.random()*C.length)]};border-radius:${['50%','2px','5px'][Math.floor(Math.random()*3)]};animation-delay:${(Math.random()*.7).toFixed(2)}s;animation-duration:${(1.2+Math.random()*.6).toFixed(2)}s;`;
+    zone.appendChild(p);
+  }
+  setTimeout(()=>{zone.innerHTML='';},2600);
+}
+</script>
+</body>
+</html>
