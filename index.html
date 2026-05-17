@@ -155,6 +155,9 @@ body{
 .ghost-layer{position:absolute;inset:0;padding:12px;pointer-events:none;transition:opacity .5s;overflow:hidden}
 .ghost-img{display:block;width:68px;height:68px;object-fit:contain;margin:5px;flex-shrink:0;opacity:.30;filter:grayscale(1);border:2.5px dashed rgba(80,160,80,.55);border-radius:12px;background:rgba(180,230,180,.10)}
 .ghost-layer.fade-out{opacity:0}
+/* Level 5: constrain field so seeds overflow without flex-wrap */
+#c5{max-width:340px;overflow:hidden}
+#gl5{max-width:340px}
 
 </style>
 </head>
