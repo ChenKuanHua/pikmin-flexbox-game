@@ -159,6 +159,9 @@ body{
 #c5{max-width:340px;overflow:hidden}
 #gl5{max-width:340px}
 
+
+.editor.typing{border-color:rgba(255,155,30,.85);box-shadow:0 0 0 3px rgba(255,145,20,.20);transition:border-color .2s,box-shadow .2s}
+.editor.correct{border-color:rgba(72,210,90,.9);box-shadow:0 0 0 3px rgba(60,200,70,.22);transition:border-color .2s,box-shadow .2s}
 </style>
 </head>
 <body>
@@ -446,7 +449,14 @@ function applyCSS(n,txt){
     if(done.has(n))return;
     applyCSS(n,this.value);
     const s=getComputedStyle(document.getElementById('c'+n));
-    if(PASS[n]({display:s.display,flexDirection:s.flexDirection,justifyContent:s.justifyContent,alignItems:s.alignItems,flexWrap:s.flexWrap}))celebrate(n);
+    const ed=this.parentElement;
+    if(PASS[n]({display:s.display,flexDirection:s.flexDirection,justifyContent:s.justifyContent,alignItems:s.alignItems,flexWrap:s.flexWrap})){
+      ed.classList.remove('typing');ed.classList.add('correct');
+      celebrate(n);
+    }else{
+      ed.classList.remove('correct');
+      this.value.trim()?ed.classList.add('typing'):ed.classList.remove('typing');
+    }
   });
 });
 
